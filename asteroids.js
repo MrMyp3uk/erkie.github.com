@@ -1,18 +1,16 @@
+// Altered version by Mr. Myp3uk (c) 2017
 // See license: https://github.com/erkie/erkie.github.com/blob/master/README
 
 (function() {
+// restrict to kanobu.ru and local dev host
+if (window.location.hostname !== 'kanobu.ru' && window.location.protocol !== 'file:') return;
+
 function Asteroids() {
 	if ( ! window.ASTEROIDS )
 		window.ASTEROIDS = {
 			enemiesKilled: 0,
 			startedPlaying: (new Date()).getTime()
 		};
-	
-	var BASEPATH = 'http://kickassapp.com/';
-	
-	/*
-		Classes
-	*/
 	
 	function Vector(x, y) {
 		if ( typeof x == 'Object' ) {
@@ -178,103 +176,7 @@ function Asteroids() {
 			return (ua >= 0.0 && ua <= 1.0 && ub >= 0.0 && ub <= 1.0);
 		}
 	};
-	
-	function Highscores() {
-	  
-	};
-	
-	Highscores.prototype = {
-	  build: function() {
-	      var self = this;
-	    
-    		var w = (document.clientWidth || window.innerWidth || document.documentElement.clientWidth);
-    		var h = (document.clientHeight || window.innerHeight || document.documentElement.clientHeight);
 
-    		this.container = document.createElement('div');
-    		this.container.className = "ASTEROIDSYEAH";
-    		with ( this.container.style ) {
-    			position = "fixed";
-    			top = parseInt(h / 2 - 250, 10) + "px";
-    			left = parseInt(w / 2 - 250, 10) + "px";
-    			width = "500px";
-    			height = "500px";
-    			boxShadow = MsBoxShadow = OBoxShadow = MozBoxShadow = WebkitBoxShadow = "0 0 25px #000";
-    			zIndex = "1000002";
-				//webkitTransform causes a bug where you can't click anything in the iframe if the scroll is not top
-    			//webkitTransform = 'scale(0, 0)';
-    			//webkitTransition = "-webkit-transform 500ms";
-    			background = '#222';
-    		};
-    		document.body.appendChild(this.container);
-
-    		// Create iframe
-    		this.iframe = document.createElement('iframe');
-    		this.iframe.className = "ASTEROIDSYEAH";
-    		this.iframe.width = this.iframe.height = 500;
-    		this.iframe.frameBorder = 0;
-    		this.container.appendChild(this.iframe);
-
-    		// Create close button
-    		this.close = document.createElement('a');
-    		this.close.href = "#";
-    		this.close.onclick = function() {
-    			self.hide();
-    			return false;
-    		};
-    		this.close.innerHTML = "X";
-    		with ( this.close.style ) {
-    			position = "absolute";
-    			display = "block";
-    			padding = "2px 6px";
-    			top = "-12px";
-    			right = "-12px";
-    			background = "#222";
-    			//textIndent = "-10000px";
-    			border = "3px solid #fff";
-    			boxShadow = "1px 1px 5px #000";
-    			color = "#fff";
-    			textAlign = "center";
-    			borderRadius = "24px";
-    			outline = "none";
-    			textDecoration = "none";
-    			fontFamily = "Verdana";
-    			fontSize = "16px";
-    			fontWeight = "bold";
-    			zIndex = "10003";
-    		}
-    		this.container.appendChild(this.close);
-    		this.hide();
-    		
-    		document.body.appendChild(this.container);
-	  },
-	  
-		show: function() {
-		  this.build();
-		  this.container.style.display = 'block';
-			
-			var self = this;
-			setTimeout(function() {
-			  //self.container.style.webkitTransform = 'scale(1, 1)';
-			}, 50);
-			
-			this.sendScore();
-		},
-		
-		hide: function() {
-			if ( this.container && this.container.parentNode )
-				this.container.parentNode.removeChild(this.container);
-		},
-		
-		sendScore: function() {
-		  var timePlayed = (new Date()).getTime() - window.ASTEROIDS.startedPlaying;
-			this.iframe.src = highscoreURL + "?asd=" + (window.ASTEROIDS.enemiesKilled * 10).toString() + "&sad=" + escape(document.location.href) + '&das=' + timePlayed;
-		}
-	};
-	
-	/*
-		end classes, begin code
-	*/
-	
 	var that = this;
 	
 	var isIE = !!window.ActiveXObject; // IE gets less performance-intensive
@@ -288,7 +190,6 @@ function Asteroids() {
 	}
 	
 	var playerWidth = 20, playerHeight = 30;
-	
 	var playerVerts = [[-1 * playerHeight/2, -1 * playerWidth/2], [-1 * playerHeight/2, playerWidth/2], [playerHeight/2, 0]];
 	
 	var ignoredTypes = ['HTML', 'HEAD', 'BODY', 'SCRIPT', 'TITLE', 'META', 'STYLE', 'LINK'];
@@ -300,8 +201,8 @@ function Asteroids() {
 	
 	// units/second
 	var acc			  = 300;
-	var maxSpeed	  = 600;
-	var rotSpeed	  = 360; // one rotation per second
+	var maxSpeed	  = 450;
+	var rotSpeed	  = 120;
 	var bulletSpeed	  = 700;
 	var particleSpeed = 400;
 	
@@ -311,8 +212,6 @@ function Asteroids() {
 	var bulletRadius = 2;
 	var maxParticles = isIE ? 20 : 40;
 	var maxBullets = isIE ? 10 : 20;
-	
-	var highscoreURL = BASEPATH + "highscores/";
 	
 	// generated every 10 ms
 	this.flame = {r: [], y: []};
@@ -684,7 +583,7 @@ function Asteroids() {
 			padding = '2px';
 			border = '1px solid #e1e1e1';
 			boxShadow = '-2px -2px 15px #333';
-			borderRadius = "3px";
+			borderRadius = "6px";
 		}
 		this.gameContainer.appendChild(this.navigation);
 		
@@ -694,69 +593,9 @@ function Asteroids() {
 		with ( this.points.style ) {
 			font = '28pt Arial, sans-serif';
 			fontWeight = 'bold';
-			position = 'relative';
-			left = '20px';
 		}
 		this.points.className = "ASTEROIDSYEAH";
 		this.navigation.appendChild(this.points);
-		
-		// highscore link
-		this.highscoreLink = document.createElement('a');
-		this.highscoreLink.className = "ASTEROIDSYEAH";
-		var css = {
-			fontFamily: 'Arial',
-			fontSize: '15px',
-			fontWeight: 'normal',
-			color: '#fff',
-			background: '#333',
-			textDecoration: 'none',
-			display: 'inline',
-			padding: '2px',
-			borderRadius: '5px',
-			position: 'relative',
-			left: '30px',
-			top: '-3px'
-		}
-		
-		for ( var key in css ) if ( css.hasOwnProperty(key) )
-		  this.highscoreLink.style[key] = css[key];
-		
-		this.highscoreLink.href = '#';
-		this.highscoreLink.innerHTML = "Submit highscore";
-		this.navigation.appendChild(this.highscoreLink);
-		
-		this.appstore = document.createElement('div');
-		with ( this.appstore.style ) {
-			position = 'fixed';
-			top = '10px';
-			right = '10px';
-			zIndex = '9999999';
-		}
-		this.appstore.className = 'ASTEROIDSYEAH';
-		this.appstore.innerHTML = '<a class="ASTEROIDSYEAH" target="_blank" href="http://itunes.apple.com/us/app/kick-ass-destroy-the-web/id436623109?mt=8&ls=1"><img src="http://erkie.github.com/appstore.png" class="ASTEROIDSYEAH" style="border: none" alt="Get the mobile version" /></a>';
-		this.appstore.getElementsByTagName('a')[0].onclick = function() {
-			this.parentNode.removeChild(this);
-		}
-		document.body.appendChild(this.appstore);
-		
-		// fb like box
-		this.fbLike = document.createElement('div');
-		this.fbLike.innerHTML = '<iframe src="http://www.facebook.com/plugins/likebox.php?href=http%3A%2F%2Fwww.facebook.com%2Fpages%2FKick-Ass-Destroy-the-web%2F168200253236727&amp;width=292&amp;colorscheme=light&amp;show_faces=false&amp;stream=false&amp;header=false&amp;height=62" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:300px; height:70px;" allowTransparency="true"></iframe>';
-		this.navigation.appendChild(this.fbLike);
-		
-		// Don't show appstore on frontpage, because they are already present
-		if ( document.location.href === 'http://erkie.github.com/' ) {
-			this.appstore.style.display = "none";
-		}
-		
-		this.highscoreLink.onclick = function() {
-			if ( ! that.highscores ) {
-				that.highscores = new Highscores();
-			}
-
-		  that.highscores.show();
-			return false;
-		};
 	} else {
 		this.navigation = document.getElementById('ASTEROIDS-NAVIGATION');
 		this.points = document.getElementById('ASTEROIDS-POINTS');
@@ -871,11 +710,18 @@ function Asteroids() {
 	};
 	
 	var THEPLAYER = false;
-	if ( window.KICKASSIMG ) {
+	var USER_AVATAR = document.querySelector('#js-userbar-scroller .userAva');
+	if ( USER_AVATAR ) {
 		THEPLAYER = document.createElement('img');
-		THEPLAYER.src = window.KICKASSIMG;
+		THEPLAYER.src = USER_AVATAR.src;
+		
+		SPACESHIP = document.createElement('img');
+		SPACESHIP.src = 'spaceship.png';
 	}
 	
+	var PI_SQ = Math.PI * 2;
+	var PI_HF = Math.PI / 2;
+
 	this.ctx.drawPlayer = function() {
 		if ( ! THEPLAYER ) {
 			this.save();
@@ -890,14 +736,23 @@ function Asteroids() {
 		} else {
 			this.save();
 			this.translate(that.pos.x, that.pos.y);
-			this.rotate(that.dir.angle()+Math.PI/2);
-			this.drawImage(THEPLAYER, -THEPLAYER.width/2, -THEPLAYER.height/2);
+			this.rotate(that.dir.angle() + PI_HF);
+			this.drawImage(SPACESHIP, -100, -128);
+			this.beginPath();
+			this.arc(0, 10, 50, 0, PI_SQ, false);
+			this.closePath();
+			this.clip();
+			this.drawImage(THEPLAYER, -50, -40, 100, 100);
+			this.strokeStyle = '#0064ff';
+			this.lineWidth = 4;
+			this.beginPath();
+			this.arc(0, 10, 50, 0, PI_SQ, false);
+			this.closePath();
+			this.stroke();
 			this.restore();
 		}
 	};
-	
-	var PI_SQ = Math.PI*2;
-	
+
 	this.ctx.drawBullets = function(bullets) {
 		for ( var i = 0; i < bullets.length; i++ ) {
 			this.beginPath();
@@ -923,25 +778,49 @@ function Asteroids() {
 	};
 	
 	this.ctx.drawFlames = function(flame) {
-		if ( THEPLAYER ) return;
-		
-		this.save();
-		
-		this.translate(that.pos.x, that.pos.y);
-		this.rotate(that.dir.angle());
-		
-		var oldColor = this.strokeStyle;
-		this.strokeStyle = "red";
-		this.tracePoly(flame.r);
-		this.stroke();
-		
-		this.strokeStyle = "yellow";
-		this.tracePoly(flame.y);
-		this.stroke();
-		
-		this.strokeStyle = oldColor;
-		this.restore();
+		if ( THEPLAYER ) {
+			this.drawGradientFlame(-77, 127);
+			this.drawGradientFlame(77, 127);
+		} else {
+			this.save();
+			this.translate(that.pos.x, that.pos.y);
+			this.rotate(that.dir.angle());
+			var oldColor = this.strokeStyle;
+			this.strokeStyle = "red";
+			this.tracePoly(flame.r);
+			this.stroke();
+			this.strokeStyle = "yellow";
+			this.tracePoly(flame.y);
+			this.stroke();
+			this.strokeStyle = oldColor;
+			this.restore();
+		}
 	};
+
+	this.ctx.drawGradientFlame = function (x, y) {
+		this.save();
+		this.translate(that.pos.x, that.pos.y);
+		this.rotate(that.dir.angle() + PI_HF);
+		this.scale(0.225, 1);
+
+		var scaleX = 1 / 0.225;
+		x *= scaleX;
+
+		var factor = Math.random() * 0.5 + 0.5;
+		var grad = this.createRadialGradient(x, y, 10, x, y, 40);
+		grad.addColorStop(0, 'rgba(255, 255, 255, 0.75)');
+		grad.addColorStop(0.55 * factor, 'rgba(255, 235, 59, 0.75)');
+		grad.addColorStop(0.75 * factor, 'rgba(255, 152, 0, 0.75)');
+		grad.addColorStop(0.85 * factor, 'rgba(244, 67, 54, 0.75)');
+		grad.addColorStop(1, 'rgba(244, 67, 54, 0)');
+
+		this.beginPath();
+		this.arc(x, y, 40, 0, Math.PI, false);
+		this.closePath();
+		this.fillStyle = grad;
+		this.fill();
+		this.restore();
+	}
 	
 	/*
 		Game loop
@@ -1139,10 +1018,7 @@ function Asteroids() {
 		// clear
 		if ( forceChange || this.bullets.length != 0 || this.particles.length != 0 || ! this.pos.is(this.lastPos) || this.vel.len() > 0 ) {
 			this.ctx.clear();
-			
-			// draw player
-			this.ctx.drawPlayer();
-			
+
 			// draw flames
 			if ( drawFlame )
 				this.ctx.drawFlames(that.flame);
@@ -1151,6 +1027,9 @@ function Asteroids() {
 			if (this.bullets.length) {
 				this.ctx.drawBullets(this.bullets);
 			}
+
+			// draw player
+			this.ctx.drawPlayer();
 			
 			// draw particles
 			if (this.particles.length) {
@@ -1163,13 +1042,7 @@ function Asteroids() {
 	
 	// Start timer
 	var updateFunc = function() {
-		//try {
-			that.update.call(that);
-		/*}
-		catch (e) {
-			clearInterval(interval);
-			throw e;
-		}*/
+		that.update.call(that);
 	};
 	var interval = setInterval(updateFunc, 1000 / FPS);
 	
@@ -1182,10 +1055,7 @@ function Asteroids() {
 		isRunning = false;
 		removeStylesheet("ASTEROIDSYEAHSTYLES");
 		removeClass(document.body, 'ASTEROIDSYEAH');
-		if ( this.highscores )
-			this.highscores.hide();
 		this.gameContainer.parentNode.removeChild(this.gameContainer);
-		this.appstore.parentNode.removeChild(this.appstore);
 	};
 }
 
@@ -1212,15 +1082,5 @@ if ( window.ActiveXObject && ! document.createElement('canvas').getContext ) {
 	document.getElementsByTagName('head')[0].appendChild(script);
 }
 else window.ASTEROIDSPLAYERS[window.ASTEROIDSPLAYERS.length] = new Asteroids();
-
-var trackingFrame = document.createElement('iframe');
-trackingFrame.src = 'http://erkie.github.com/tracking.html';
-trackingFrame.frameborder = '0';
-trackingFrame.style.position = 'absolute';
-trackingFrame.style.top = "-1000px";
-trackingFrame.style.height = "0px";
-trackingFrame.style.width = "0px";
-
-document.getElementsByTagName('body')[0].appendChild(trackingFrame);
 
 })();
