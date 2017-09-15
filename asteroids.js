@@ -756,6 +756,7 @@ function Asteroids() {
 	};
 
 	this.ctx.drawBullets = function(bullets) {
+		this.fillStyle = '#d50000';
 		for ( var i = 0; i < bullets.length; i++ ) {
 			this.beginPath();
 			this.arc(bullets[i].pos.x, bullets[i].pos.y, bulletRadius, 0, PI_SQ, true);
