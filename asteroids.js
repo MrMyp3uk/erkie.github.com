@@ -212,7 +212,7 @@ function Asteroids() {
 	var timeBetweenFire = 150; // how many milliseconds between shots
 	var timeBetweenBlink = 250; // milliseconds between enemy blink
 	var timeBetweenEnemyUpdate = isIE ? 10000 : 2000;
-	var bulletRadius = 2;
+	var bulletRadius = 5;
 	var maxParticles = isIE ? 20 : 40;
 	var maxBullets = isIE ? 10 : 20;
 
@@ -232,10 +232,10 @@ function Asteroids() {
 
 	addStylesheet(".ASTEROIDSBLINK .ASTEROIDSYEAHENEMY", "outline: 2px dotted red;");
 
-	this.pos = new Vector(100, 100);
+	this.pos = new Vector(Math.floor(w / 2), Math.floor(h / 2));
 	this.lastPos = false;
 	this.vel = new Vector(0, 0);
-	this.dir = new Vector(0, 1);
+	this.dir = new Vector(0, -1);
 	this.keysPressed = {};
 	this.firedAt = false;
 	this.updated = {
