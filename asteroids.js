@@ -3,7 +3,10 @@
 
 (function() {
 // restrict to kanobu.ru and local dev host
-if (window.location.hostname !== 'kanobu.ru' && window.location.protocol !== 'file:') return;
+var isKanobu = window.location.hostname === 'kanobu.ru';
+var isDevMode = window.location.protocol === 'file:';
+
+if (!isKanobu && !isDevMode) return;
 if (window.ASTEROIDSPLAYER) return;
 
 function Asteroids() {
@@ -711,11 +714,24 @@ function Asteroids() {
 		this.closePath();
 	};
 
-	var THEPLAYER = false;
-	var USER_AVATAR = document.querySelector('#js-userbar-scroller .userAva');
+	var THEPLAYER = null;
+	var SPACESHIP = null;
+
+	function extractChildProperty(object, path) {
+		var parts = path.split('.');
+		var current = object;
+		for (var i = 0; i < parts.length; i++) {
+			var next = current[parts[i]];
+			if (next == null) return null;
+			current = next;
+		}
+		return current;
+	}
+
+	var USER_AVATAR = extractChildProperty(window, '__MOBX_STATE.userStore.profile.avatar.big');
 	if ( USER_AVATAR ) {
 		THEPLAYER = document.createElement('img');
-		THEPLAYER.src = USER_AVATAR.src;
+		THEPLAYER.src = USER_AVATAR;
 
 		SPACESHIP = document.createElement('img');
 		SPACESHIP.src = BASE_URL + 'spaceship.png';
@@ -1048,6 +1064,7 @@ function Asteroids() {
 		try {
 			that.update.call(that);
 		} catch (error) {
+			if (isDevMode) console.error(error);
 			that.destroy.call(that);
 		}
 	};
