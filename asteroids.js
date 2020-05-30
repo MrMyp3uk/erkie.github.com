@@ -240,7 +240,7 @@ function Asteroids() {
 	this.vel = new Vector(0, 0);
 	this.dir = new Vector(0, -1);
 	this.keysPressed = {};
-	this.firedAt = false;
+	this.firedAt = 0;
 	this.updated = {
 		enemies: false, // if the enemy index has been updated since the user pressed B for Blink
 		flame: new Date().getTime(), // the time the flame was last updated
@@ -315,6 +315,23 @@ function Asteroids() {
 	})();
 
 	createFlames();
+
+	/*
+		Sound management
+	*/
+
+	var SOUND_EXPLOSION = new Audio(BASE_URL + 'explosion.mp3');
+	var SOUND_SHOT = new Audio(BASE_URL + 'laser.mp3');
+
+	var SOUND_ENGINES = new Audio(BASE_URL + 'engines.mp3');
+	SOUND_ENGINES.loop = true;
+	SOUND_ENGINES.volume = 0.4;
+
+	function playSound(sound) {
+		var cloned = sound.cloneNode(false);
+		cloned.volume = 0.65;
+		cloned.play().catch(console.error.bind(console));
+	}
 
 	/*
 		Math operations
@@ -632,12 +649,6 @@ function Asteroids() {
 			return;
 		that.keysPressed[event.keyCode] = true;
 
-		switch ( event.keyCode ) {
-			case code(' '):
-				that.firedAt = 1;
-			break;
-		}
-
 		// check here so we can stop propagation appropriately
 		if ( indexOf([code('up'), code('down'), code('right'), code('left'), code(' '), code('B'), code('W'), code('A'), code('S'), code('D')], event.keyCode) != -1 ) {
 			if ( event.ctrlKey || event.shiftKey )
@@ -728,10 +739,10 @@ function Asteroids() {
 		return current;
 	}
 
-	var USER_AVATAR = extractChildProperty(window, '__MOBX_STATE.userStore.profile.avatar.big');
-	if ( USER_AVATAR ) {
+	var avatarUrl = extractChildProperty(window, '__MOBX_STATE.userStore.profile.avatar.big');
+	if ( avatarUrl ) {
 		THEPLAYER = document.createElement('img');
-		THEPLAYER.src = USER_AVATAR;
+		THEPLAYER.src = avatarUrl;
 
 		SPACESHIP = document.createElement('img');
 		SPACESHIP.src = BASE_URL + 'spaceship.png';
@@ -856,6 +867,7 @@ function Asteroids() {
 	var isRunning = true;
 	var lastUpdate = new Date().getTime();
 	var forceChange = false;
+	var isMoving = false;
 
 	this.update = function() {
 		// ==
@@ -866,7 +878,6 @@ function Asteroids() {
 		lastUpdate = nowTime;
 
 		// update flame and timer if needed
-		var drawFlame = false;
 		if ( nowTime - this.updated.flame > 50 ) {
 			createFlames();
 			this.updated.flame = nowTime;
@@ -880,10 +891,17 @@ function Asteroids() {
 		if ( (this.keysPressed[code('up')]) || (this.keysPressed[code('W')]) ) {
 			this.vel.add(this.dir.mulNew(acc * tDelta));
 
-			drawFlame = true;
+			if (!isMoving) {
+				isMoving = true;
+				SOUND_ENGINES.play().catch(console.error.bind(console));
+			}
 		} else {
 			// decrease speed of player
 			this.vel.mul(0.96);
+			if (isMoving) {
+				isMoving = false;
+				SOUND_ENGINES.pause();
+			}
 		}
 
 		// rotate counter-clockwise
@@ -912,6 +930,8 @@ function Asteroids() {
 			if ( this.bullets.length > maxBullets ) {
 				this.bullets.pop();
 			}
+
+			playSound(SOUND_SHOT);
 		}
 
 		// add blink
@@ -1000,6 +1020,7 @@ function Asteroids() {
 						window.ASTEROIDS.enemiesKilled++;
 
 					this.dying[i].parentNode.removeChild(this.dying[i]);
+					playSound(SOUND_EXPLOSION);
 				} catch ( e ) {}
 			}
 
@@ -1039,7 +1060,7 @@ function Asteroids() {
 			this.ctx.clear();
 
 			// draw flames
-			if ( drawFlame )
+			if ( isMoving )
 				this.ctx.drawFlames(that.flame);
 
 			// draw bullets
